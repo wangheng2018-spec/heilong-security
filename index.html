@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1b2a">
+<meta name="description" content="本地运行的账号、设备、服务器与数据安全自查清单，含密码强度与熵值评估、哈希/编码格式识别、钓鱼诈骗风险打分、应急响应处置流程与加固优先级报告。全程本地计算，不上传任何数据。">
+<title>黑龙 · 安全自查与应急响应</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:#f4f6f9;color:#16222e;
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif}
+body{padding-bottom:40px}
+#wrap{max-width:800px;margin:0 auto;padding:0 14px}
+header{background:linear-gradient(135deg,#0d1b2a,#1d3f66);color:#fff;padding:20px 14px 18px;margin-bottom:14px}
+header h1{margin:0;font-size:20px;letter-spacing:.5px}
+header p{margin:6px 0 0;font-size:13px;opacity:.86}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 1px 2px rgba(16,32,56,.04)}
+.card h2{font-size:16px;margin:0 0 10px;padding-left:10px;border-left:4px solid #1d4e79}
+label{display:block;font-size:14px;color:#40536b;margin:12px 0 5px;font-weight:600}
+label .req{color:#d33;margin-left:4px}
+input[type=text],input[type=password],input[type=date],input[type=number],select,textarea{
+  width:100%;font:inherit;padding:10px 11px;border:1px solid #d3dbe6;border-radius:10px;background:#fbfdff;color:#16222e}
+textarea{min-height:110px;line-height:1.7;resize:vertical}
+.hint{font-size:12.5px;color:#74869d;margin-top:4px}
+.chk{display:flex;align-items:flex-start;gap:8px;margin:7px 0;font-weight:400;color:#28374d}
+.chk input{margin-top:4px;width:18px;height:18px;flex:0 0 auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.grid2{grid-template-columns:1fr}}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;background:#1d4e79;color:#fff;font:inherit;font-weight:700;margin-top:16px}
+.btn.alt{background:#eef3f9;color:#1d4e79;border:1px solid #cfdcea;font-weight:600}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+.btn-row .btn{margin-top:0}
+.notice{background:#fff8e6;border:1px solid #f0dfae;border-radius:12px;padding:12px;font-size:13.5px;color:#6b5520}
+.notice b{color:#8a6a12}
+.legal{background:#eef3f9;border:1px solid #cfdcea;border-radius:12px;padding:12px;font-size:13.5px;color:#26405c;margin-top:10px}
+.danger{background:#fff3f3;border:1px solid #f3cfcf;border-radius:12px;padding:12px;font-size:13.5px;color:#8c2b2b}
+.report h3{font-size:15px;margin:18px 0 8px;padding-left:9px;border-left:4px solid #1d4e79;color:#12314e}
+.report p,.report li{font-size:15px}
+.report ul{padding-left:22px;margin:6px 0}
+.report table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+.report th,.report td{border:1px solid #e2e8f0;padding:7px 9px;text-align:left;vertical-align:top}
+.report th{background:#f2f6fa;color:#31465f;font-weight:600}
+.ok{color:#16803c;font-weight:700}
+.mid{color:#b7791f;font-weight:700}
+.bad{color:#c0392b;font-weight:700}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:8px;background:#eef3f9;color:#26405c;margin-right:6px}
+.p-high{background:#fff1f0;border:1px solid #f3cfcf}
+.p-mid{background:#fffaf0;border:1px solid #f2e3c0}
+.p-low{background:#f6f8fa;border:1px solid #e2e8f0}
+.box{background:#f7fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin:8px 0;font-size:14.5px}
+.meter{height:12px;border-radius:7px;background:#e8eef5;overflow:hidden;margin:8px 0 4px}
+.meter i{display:block;height:100%;width:0;transition:width .25s}
+.big{font-size:30px;font-weight:800;line-height:1.2}
+footer{font-size:12.5px;color:#74869d;padding:16px 4px;line-height:1.7}
+.tagline{font-size:12.5px;color:#74869d;text-align:center;margin:18px 0 0}
+@media print{
+  header,.noprint{display:none!important}
+  body{background:#fff}
+  .card{box-shadow:none;border:0;padding:0}
+  .report h3{page-break-after:avoid}
+  .box,.danger,.notice{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>黑龙 · 安全自查与应急响应</h1>
+  <p>密码强度 · 格式识别 · 钓鱼诈骗 · 账号 / 备份 / 主机 / 设备自查 · 应急流程　｜　全部计算在本机完成</p>
+</header>
+
+<div id="wrap">
+
+  <div class="card noprint">
+    <div class="notice">
+      <b>使用前必读：</b>本工具用于对你<b>自己拥有</b>或<b>已获得书面授权</b>的系统、账号与设备做安全自查，
+      并给出加固建议与应急流程。<b>它不提供任何扫描、探测、破解、绕过或攻击功能</b>，
+      也不收集你的任何输入（无后端、无联网请求、无第三方脚本）。
+      <div class="chk" style="margin-top:10px">
+        <input type="checkbox" id="agree"><label for="agree" style="margin:0;font-weight:600;color:#6b5520">我已阅读并理解上述说明</label>
+      </div>
+    </div>
+    <div class="legal">
+      <b>合法边界：</b>未经授权对他人系统进行扫描、测试、入侵或干扰，可能违反
+      《中华人民共和国网络安全法》《数据安全法》《个人信息保护法》，
+      并可能触犯《刑法》第 285 条（非法侵入计算机信息系统、非法获取计算机信息系统数据）、
+      第 286 条（破坏计算机信息系统）等规定。
+      <b>请仅用于自有系统或已获书面授权的范围，并保留授权文件。</b>
+      发现他人系统存在风险时，正确做法是<b>通过官方渠道报告</b>，而不是自行测试。
+    </div>
+  </div>
+
+  <div class="card noprint">
+    <h2>一、密码强度与熵值（本机计算，不保存）</h2>
+    <label>待评估的口令<span class="req">*</span></label>
+    <input type="password" id="pw" autocomplete="new-password" spellcheck="false" placeholder="输入一个口令或结构相似的示例口令">
+    <div class="hint">
+      安全提示：本页<b>不需要、也不建议</b>输入你正在使用的真实口令——可把关键字符替换成同类字符（如数字换数字、字母换字母）后再评估，结论基本一致。<br>
+      计算全程在你的浏览器内完成，<b>不上传、不写入本地存储、不在报告中出现原文</b>。
+    </div>
+    <button class="btn alt" id="pwgo">评估强度与熵值</button>
+    <div id="pwout"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>二、哈希 / 编码格式识别</h2>
+    <label>待识别的字符串（可选）</label>
+    <input type="text" id="hv" spellcheck="false" placeholder="例如一长串十六进制、Base64 串或 $2b$... 开头的口令哈希">
+    <div class="hint">
+      仅按<b>长度与字符集</b>给出候选格式，用于判断数据是什么东西（例如判断自己系统里的口令是不是用 MD5 存放）。
+      <b>本工具不提供解密、还原、碰撞或彩虹表能力</b>，也不会有任何联网查询。
+      建议先做字符替换再粘贴，不要粘贴真实的会话 Token、口令哈希或他人的验证码。
+    </div>
+    <button class="btn alt" id="hvgo">识别格式</button>
+    <div id="hvout"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>三、钓鱼与诈骗识别自评</h2>
+    <div class="hint" style="margin-bottom:8px">
+      请对照<b>对方实际表现出的特征</b>勾选；勾选=该特征存在，勾得越多、风险越高。
+      <b>任何一条高危项（标 ⚠）成立，就按高风险处理。</b>
+    </div>
+    <div id="sec_phish"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>四、账号安全自查</h2>
+    <div class="hint" style="margin-bottom:8px">勾选=<b>已经做到</b>。未勾选表示尚未确认或尚未落实，会按风险计入报告。</div>
+    <div id="sec_account"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>五、备份与数据安全自查</h2>
+    <div class="hint" style="margin-bottom:8px">勾选=<b>已经做到</b>。3-2-1 原则：3 份副本、2 种介质、1 份异地/离线。</div>
+    <div id="sec_backup"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>六、主机 / 服务器暴露面自查清单</h2>
+    <div class="hint" style="margin-bottom:8px">
+      勾选=<b>已经做到</b>。本清单只用于核对配置与判断标准，<b>不提供任何扫描、探测、端口识别或利用方法</b>。<br>
+      请在实际操作时确认你对该主机有管理权与授权。
+    </div>
+    <div id="sec_host"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>七、手机与个人设备自查</h2>
+    <div class="hint" style="margin-bottom:8px">勾选=<b>已经做到</b>。</div>
+    <div id="sec_mobile"></div>
+  </div>
+
+  <div class="card noprint">
+    <h2>八、应急响应流程</h2>
+    <label>选择你正在面对或想提前准备的情形（可多选）</label>
+    <div id="emgbox"></div>
+    <div class="hint">会按选中的情形输出分步处置、需保留的证据、应联系谁，以及<b>禁止事项</b>。</div>
+  </div>
+
+  <div class="card noprint">
+    <h2>九、生成报告</h2>
+    <label>自查范围与备注（可选）</label>
+    <textarea id="scope" placeholder="例如：自查对象为本人在用的 3 台设备与 1 台云服务器；自查时间 2026-09-20；参与人：本人。授权情况说明……"></textarea>
+    <div class="hint">请勿在此填写任何密码、验证码、密钥或 token。</div>
+    <div class="chk" style="margin-top:12px">
+      <input type="checkbox" id="own"><label for="own" style="margin:0">我确认本次自查仅针对我本人拥有或已获得书面授权的系统、账号与设备</label>
+    </div>
+    <button class="btn" id="go">生成自查报告</button>
+    <button class="btn alt" id="clear">清空并删除本机草稿</button>
+    <div class="hint" style="text-align:center">所有内容只保存在你的浏览器本地，不会上传到任何服务器</div>
+  </div>
+
+  <div id="result"></div>
+
+  <footer>
+    <b>免责声明</b>：本页面为自助式安全自查工具，输出内容系依据你勾选与填写的信息，
+    按常见安全实践与公开的加固标准生成的<b>参考清单</b>，不构成安全评估报告、合规审计结论或专业技术服务意见，
+    也不代表己方网络的真实安全状态（自查不能替代渗透测试与专业评估）。
+    密码强度与熵值是基于字符集与长度的<b>估算模型</b>，不保证与实际被破解难度完全一致。
+    格式识别仅按字符串形态推测，可能误判。
+    安全实践与法规要求会变化，请结合自身业务并咨询专业安全人员。<br>
+    <b>法律边界</b>：请仅对自有或已获书面授权的对象自查。未经授权测试他人系统可能违反《网络安全法》《刑法》第 285/286 条等规定。
+    在自有系统上操作时，也请先做好备份与回滚方案。<br>
+    <b>隐私</b>：本页面为纯静态单文件，无后端、无外部依赖、无任何网络请求；数据仅存于你的设备（localStorage），
+    密码输入框与格式识别输入框的内容<b>不会被保存</b>。清除浏览器数据即删除。
+    <p class="tagline">— 黑龙 · 安全自查与应急响应工具 · 供参考 —</p>
+  </footer>
+</div>
+
+<script>
+/* =======================================================================
+   黑龙 · 安全自查与应急响应工具
+   纯本地单文件：无外部依赖、无 fetch/XHR、无网络请求、无存储上报。
+   覆盖能力：口令强度与熵值估算 / 哈希编码格式识别 / 钓鱼诈骗风险评估 /
+             账号·备份·主机·终端自查 / 应急响应流程 / 报告与加固优先级
+   明确不含：任何扫描、探测、爆破、字典生成、漏洞利用、绕过认证、提权内容。
+   ======================================================================= */
+
+var $ = function(id){ return document.getElementById(id) };
+var esc = function(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}) };
+
+/* ============================ 一、口令强度与熵值 ============================ */
+
+var POOL = { lower:26, upper:26, digit:10, symbol:32, other:100 };
+/* 说明：symbol=ASCII 可打印符号 32 个（33–126 去掉字母数字）；
+   other=非 ASCII 字符（中文、全角、Emoji 等）按保守经验值 100 计入，
+   注意：这只是估算模型，用于比较强弱，不代表真实破解成本。 */
+
+function charsets(pw){
+  var f = { lower:false, upper:false, digit:false, symbol:false, other:false };
+  for(var i=0;i<pw.length;i++){
+    var c = pw.charCodeAt(i);
+    if(c>=97 && c<=122) f.lower = true;
+    else if(c>=65 && c<=90) f.upper = true;
+    else if(c>=48 && c<=57) f.digit = true;
+    else if(c>=33 && c<=126) f.symbol = true;
+    else f.other = true;
+  }
+  return f;
+}
+function poolOf(f){
+  var p = 0;
+  if(f.lower) p += POOL.lower;
+  if(f.upper) p += POOL.upper;
+  if(f.digit) p += POOL.digit;
+  if(f.symbol) p += POOL.symbol;
+  if(f.other) p += POOL.other;
+  return p;
+}
+function entropyBits(pw){
+  var f = charsets(pw), p = poolOf(f);
+  if(!pw.length || !p) return { pool:0, bits:0, f:f };
+  return { pool:p, bits: pw.length * Math.log(p) / Math.LN2, f:f };
+}
+
+/* 常见弱口令 —— 仅用于识别"你正在使用极弱口令"这一事实，
+   不提供、也不能用于生成或猜测他人口令。 */
+var COMMON = ["password","passw0rd","p@ssw0rd","123456","123456789","12345678","1234567","12345",
+  "qwerty","qwertyuiop","abc123","111111","000000","666666","888888","iloveyou","admin","administrator",
+  "root","toor","letmein","welcome","monkey","dragon","master","shadow","superman","sunshine","princess",
+  "football","baseball","test","guest","changeme","default","system","manager","login","secret",
+  "asdfgh","zxcvbn","qazwsx","1qaz2wsx","1q2w3e4r","woaini","5201314","1314520","a123456","abcd1234"];
+var KEYROWS = ["qwertyuiop","asdfghjkl","zxcvbnm","1234567890","qazwsx","wsxedc","1qaz2wsx","zaq12wsx"];
+
+function weakPatterns(pw){
+  var low = pw.toLowerCase();
+  var issues = [];
+  function add(level, title, tip){ issues.push({ level:level, title:title, tip:tip }) }
+
+  /* 长度 */
+  if(pw.length < 8) add("高","长度不足 8 位（当前 "+pw.length+" 位）","重要账号口令建议至少 12–16 位；长度对强度的影响远大于复杂度。");
+  else if(pw.length < 12) add("中","长度仅 "+pw.length+" 位，偏短","建议提升到 16 位以上；3–4 个不相关的词组合也很好用。");
+
+  /* 字符集 */
+  var f = charsets(pw);
+  var kinds = (f.lower?1:0)+(f.upper?1:0)+(f.digit?1:0)+(f.symbol?1:0)+(f.other?1:0);
+  if(pw.length){
+    if(/^[0-9]+$/.test(pw)) add("高","全部为数字","纯数字口令几乎必然被优先尝试，请混入字母与符号，或直接改为长口令短语。");
+    else if(/^[A-Za-z]+$/.test(pw)) add("中","只有字母，没有数字或符号","加入数字与符号可扩大字符集；若已足够长（18 位以上）风险较低。");
+    else if(kinds <= 2) add("中","只用了 "+kinds+" 类字符","建议同时包含大小写字母、数字与符号，或把长度提升上去。");
+    if(f.other && !f.lower && !f.upper) add("低","以非 ASCII 字符（如中文）为主","部分系统对中文口令支持不一致，建议确认登录与找回流程都正常。");
+  }
+
+  /* 常见口令 */
+  var hitCommon = COMMON.filter(function(w){ return low === w || (w.length>=6 && low.indexOf(w)>=0) });
+  if(hitCommon.length) add("高","包含常见口令片段（"+hitCommon.slice(0,3).join("、")+"）","这类字符串在任何口令猜测中都会被最先尝试，请整体更换。");
+  if(COMMON.indexOf(low) >= 0) add("高","与常见口令完全一致","请立即更换，并检查该口令是否在其他网站复用。");
+
+  /* 连续字符 */
+  var seq = ["abcdefghijklmnopqrstuvwxyz","0123456789","qwertyuiop","asdfghjkl","zxcvbnm"];
+  var foundSeq = null;
+  seq.forEach(function(s){
+    var rs = s.split("").reverse().join("");
+    for(var i=0;i+3<=s.length;i++){
+      var a = s.substr(i,3), b = rs.substr(i,3);
+      if(low.indexOf(a)>=0 || low.indexOf(b)>=0) foundSeq = a;
+    }
+  });
+  if(foundSeq) add("中","含连续字符序列（如 "+foundSeq+"）","键盘与字母表顺序是最先被尝试的模式之一，请打散。");
+
+  /* 键盘相邻片段 */
+  var kb = KEYROWS.filter(function(row){
+    for(var i=0;i+4<=row.length;i++){ if(low.indexOf(row.substr(i,4))>=0) return true }
+    return false;
+  });
+  if(kb.length) add("中","含键盘行走式片段（"+kb[0]+"）","例如 qwer / asdf / zxcv 一类，属于高频猜测模式。");
+
+  /* 年份 / 日期 */
+  var y = pw.match(/(19|20)\d{2}/);
+  if(y) add("中","包含年份（"+y[0]+"）","生日、纪念日、入职年份等可从公开信息推测，建议去掉。");
+  if(/((19|20)\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])|(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])((19|20)\d{2})/.test(pw))
+    add("高","包含完整日期（年月日格式）","日期组合的猜测空间极小，请勿把生日写进口令。");
+  var rep = pw.match(/(.)\1{2,}/);
+  if(rep) add("中","存在重复字符（如 "+rep[0]+"）","aaaa、1111 这类重复会显著降低实际强度。");
+  var rep2 = pw.match(/(.{2,4})\1+/);
+  if(rep2) add("中","存在重复片段（如 "+rep2[0]+"）","abcabc 型结构容易被模式化猜测命中。");
+
+  /* 手机号 / 常见编号 */
+  if(/1[3-9]\d{9}/.test(pw)) add("高","包含手机号形态的数字段","手机号在社工库中极易获得，绝对不能作为口令。");
+  return issues;
+}
+
+function pwLevel(score){
+  if(score < 30) return ["极弱","#c0392b"];
+  if(score < 50) return ["弱","#d97706"];
+  if(score < 65) return ["中等","#b7791f"];
+  if(score < 85) return ["强","#16803c"];
+  return ["很强","#0f7a5a"];
+}
+function bitsToScore(bits){
+  if(bits < 28) return 12;
+  if(bits < 36) return 26;
+  if(bits < 45) return 36;
+  if(bits < 60) return 48;
+  if(bits < 75) return 62;
+  if(bits < 90) return 76;
+  if(bits < 105) return 86;
+  if(bits < 120) return 93;
+  return 97;
+}
+function humanTime(sec){
+  if(!isFinite(sec) || sec <= 0) return "瞬间";
+  if(sec < 1) return "不到 1 秒";
+  var u = [[31557600,"年"],[86400,"天"],[3600,"小时"],[60,"分钟"],[1,"秒"]];
+  for(var i=0;i<u.length;i++){
+    if(sec >= u[i][0]){
+      var v = sec / u[i][0];
+      return (v >= 100 ? Math.round(v) : v.toFixed(1)) + " " + u[i][1];
+    }
+  }
+  return "不到 1 秒";
+}
+/* 参考估算：假定攻击者已拿到哈希、可每秒尝试 1e11 次（本地高速设备量级）。
+   这里只用来解释"为什么长度比复杂度更重要"，不涉及任何猜测方法。 */
+function refCrackTime(bits){
+  if(bits <= 0) return "瞬间";
+  var log10sec = bits * Math.LN2 / Math.LN10 - 1 - Math.log(1e11) / Math.LN10;
+  if(log10sec > 18) return "10^18 秒以上（远超现实可行范围）";
+  return humanTime(Math.pow(10, log10sec));
+}
+
+var lastPw = null;   /* 只保留派生指标，绝不保留口令原文 */
+
+function analyzePassword(pw){
+  var e = entropyBits(pw);
+  var issues = weakPatterns(pw);
+  var score = bitsToScore(e.bits);
+  var penalty = 0;
+  issues.forEach(function(it){
+    if(it.level === "高") penalty += 12;
+    else if(it.level === "中") penalty += 7;
+    else penalty += 3;
+  });
+  score = Math.max(0, score - penalty);
+  if(pw.length >= 16) score += 5;
+  if(pw.length >= 20) score += 3;
+
+  /* 硬性上限：结构性缺陷不能被长度掩盖 */
+  var hard = [];
+  if(pw.length < 8){ score = Math.min(score, 28); hard.push("长度不足 8 位"); }
+  if(/^[0-9]+$/.test(pw) && pw.length < 12){ score = Math.min(score, 30); hard.push("纯数字且偏短"); }
+  if(COMMON.indexOf(pw.toLowerCase()) >= 0){ score = Math.min(score, 18); hard.push("命中常见口令"); }
+  if(pw.length <= 6){ score = Math.min(score, 22); }
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  var lv = pwLevel(score);
+  return { len:pw.length, pool:e.pool, bits:e.bits, f:e.f, score:score, level:lv[0], color:lv[1], issues:issues, hard:hard };
+}
+
+function renderPw(res){
+  var f = res.f;
+  var parts = [];
+  if(f.lower) parts.push("小写字母 26");
+  if(f.upper) parts.push("大写字母 26");
+  if(f.digit) parts.push("数字 10");
+  if(f.symbol) parts.push("符号 32");
+  if(f.other) parts.push("非 ASCII 约 100");
+  var h = [];
+  h.push('<div class="box">');
+  h.push('<div class="meter"><i style="width:'+res.score+'%;background:'+res.color+'"></i></div>');
+  h.push('强度：<b style="color:'+res.color+'">'+esc(res.level)+'</b>　（综合评分 '+res.score+' / 100）');
+  h.push('<table style="margin-top:10px"><tr><th>长度</th><td>'+res.len+' 个字符</td></tr>');
+  h.push('<tr><th>字符集大小</th><td>'+res.pool+(parts.length?'（'+esc(parts.join(" + "))+'）':'')+'</td></tr>');
+  h.push('<tr><th>信息熵</th><td><b>'+res.bits.toFixed(1)+' bit</b>'+
+    '<div class="hint">估算公式：熵 = 长度 × log₂(字符集大小) = '+res.len+' × log₂('+res.pool+'）</div></td></tr>');
+  h.push('<tr><th>参考强度</th><td>在"每秒约 10¹¹ 次尝试"的离线场景下，平均需要约 <b>'+esc(refCrackTime(res.bits))+'</b>'+
+    '<div class="hint">仅用于说明长度的价值，不代表真实攻击行为；熵值估算不覆盖所有猜测策略（模式化猜测会更快）。</div></td></tr>');
+  h.push('</table></div>');
+
+  if(res.hard.length) h.push('<div class="danger">⛔ 存在结构性弱点：'+esc(res.hard.join("；"))+'，不宜用于任何重要账号。</div>');
+
+  if(res.issues.length){
+    h.push('<div class="box"><b>发现的弱模式与改进建议</b><ul>');
+    res.issues.forEach(function(it){
+      var cls = it.level==="高" ? "bad" : it.level==="中" ? "mid" : "ok";
+      h.push('<li><span class="'+cls+'">['+esc(it.level)+']</span> '+esc(it.title)+'<div class="hint">'+esc(it.tip)+'</div></li>');
+    });
+    h.push('</ul></div>');
+  } else {
+    h.push('<div class="box"><b>未发现常见弱模式。</b><div class="hint">未发现不代表绝对安全：请确认它没有在其他网站复用，也没有被任何人（包括你信任的人）知道。</div></div>');
+  }
+
+  h.push('<div class="legal"><b>怎么变强（按性价比排序）</b><ol style="margin:6px 0;padding-left:22px">');
+  h.push('<li><b>加长度</b>：16–20 位以上收益最大；用 3–4 个不相关的词拼接（如 电池-菠萝-地铁-73）就很强也好记。</li>');
+  h.push('<li><b>不重复</b>：同一口令不要用于第二个网站；用密码管理器生成和保存。</li>');
+  h.push('<li><b>不用个人信息</b>：姓名拼音、生日、手机号、门牌号、宠物名都不用。</li>');
+  h.push('<li><b>开启两步验证</b>：口令泄露后这往往是最后一道防线，优先用验证器 App 或安全密钥。</li>');
+  h.push('<li><b>定期更换关键账号口令</b>：邮箱、支付、社交、工作账号优先级最高。</li>');
+  h.push('</ol><b>本页没有保存你输入的任何一个字符。</b></div>');
+  return h.join("");
+}
+
+/* ============================ 二、哈希 / 编码格式识别 ============================ */
+
+function detectFormat(raw){
+  var s = (raw || "").trim();
+  var out = [];
+  if(!s) return out;
+  function add(name, note, cls){ out.push({ name:name, note:note||"", cls:cls||"" }) }
+
+  /* 口令哈希类（带算法标识） */
+  if(/^\$2[abxy]?\$\d{1,2}\$[./A-Za-z0-9]{53}$/.test(s))
+    add("bcrypt 口令哈希","抗暴力破解能力较强的口令存储格式，属于合适的选择。", "ok");
+  else if(/^\$argon2(id|i|d)\$/.test(s))
+    add("Argon2 口令哈希（PHC 字符串）","现代推荐的口令哈希算法，建议优先使用 argon2id。", "ok");
+  else if(/^\$scrypt\$/.test(s))
+    add("scrypt 口令哈希","较新的口令哈希算法，可用于口令存储。", "ok");
+  else if(/^\$6\$/.test(s))
+    add("sha512crypt 哈希（常见于 Linux /etc/shadow）","Linux 账号口令哈希；有盐值但迭代强度弱于 argon2/bcrypt。", "mid");
+  else if(/^\$5\$/.test(s))
+    add("sha256crypt 哈希（常见于 Linux /etc/shadow）","Linux 账号口令哈希。", "mid");
+  else if(/^\$1\$/.test(s))
+    add("md5crypt 哈希（旧式）","已过时，不建议继续用于口令存储，建议迁移到 argon2id / bcrypt。", "bad");
+
+  /* 令牌类 */
+  if(/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*$/.test(s))
+    add("JWT（JSON Web Token）","这是<b>身份凭证，作用等同于密码</b>：不要分享、不要粘贴到任何第三方页面，若担心已泄露请立即吊销/轮换密钥。", "bad");
+
+  /* 标识符类 */
+  if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s))
+    add("UUID / GUID","通常是资源标识符，不是口令或密钥。", "mid");
+  if(/^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(s))
+    add("MAC 地址","设备物理地址，属于弱标识，不要当作认证凭据。", "mid");
+
+  /* 十六进制按长度推断 */
+  var isHex = /^[0-9a-fA-F]+$/.test(s), L = s.length;
+  if(/^\*[0-9A-Fa-f]{40}$/.test(s))
+    add("MySQL 4.1+ 口令哈希（* 前缀）","数据库内旧式口令存储，强度不足，建议改由应用层使用强哈希存储。", "bad");
+  else if(isHex){
+    if(L === 8) add("8 位十六进制（32 bit）","可能是 CRC-32 校验值，也可能是编号或被截断的哈希。", "mid");
+    else if(L === 16) add("16 位十六进制（64 bit）","可能是截断哈希或自定义校验值。", "mid");
+    else if(L === 32) add("MD5 / NTLM / MD4（32 位十六进制）","MD5 已不适合用于口令存储（可被快速碰撞与高速猜测），若是口令哈希建议迁移到 argon2id / bcrypt，并加盐。", "bad");
+    else if(L === 40) add("SHA-1 / RIPEMD-160（40 位十六进制）","SHA-1 已不推荐用于安全用途。", "mid");
+    else if(L === 56) add("SHA-224 / SHA3-224（56 位十六进制）","","mid");
+    else if(L === 64) add("SHA-256 / SHA3-256 / Keccak-256 / BLAKE2s-256（64 位十六进制）","常见完整性校验摘要；不带盐的单一哈希仍不适合存口令。", "mid");
+    else if(L === 96) add("SHA-384 / SHA3-384（96 位十六进制）","","mid");
+    else if(L === 128) add("SHA-512 / SHA3-512 / Whirlpool（128 位十六进制）","","mid");
+    else add("纯十六进制字符串（"+L+" 位）","长度不对应常见摘要，可能是拼接值、自定义格式或编码后的数据。", "mid");
+  }
+  if(/^0x[0-9a-fA-F]+$/.test(s)) add("带 0x 前缀的十六进制数值","","mid");
+
+  /* Base64 / Base32 / URL 编码 */
+  var isB64 = /^[A-Za-z0-9+/]+={0,2}$/.test(s) && L >= 12 && L % 4 === 0 && !isHex;
+  if(isB64 && (/[+/]/.test(s) || (/[A-Z]/.test(s) && /[a-z]/.test(s) && /[0-9]/.test(s))))
+    add("可能是 Base64 编码","Base64 只是<b>编码</b>，不是加密，任何人都能还原；不要把密钥、口令藏在 Base64 里当保护。", "bad");
+  if(/^[A-Za-z0-9_-]+={0,2}$/.test(s) && /[-_]/.test(s) && L >= 12)
+    add("可能是 Base64URL / 无填充 Base64 变体","常见于 URL 参数、JWT 片段；同样只是编码，不提供任何保密性。", "mid");
+  if(/^[A-Z2-7]+=*$/.test(s) && !isHex && !/[a-z]/.test(s) && L >= 16 && L % 8 === 0)
+    add("可能是 Base32 编码","常见于两步验证（TOTP）密钥；这类密钥等同于密码，务必保密，不要粘贴到任何网站。", "bad");
+  if(/%[0-9A-Fa-f]{2}/.test(s))
+    add("含 URL 编码（百分号转义）","说明它可能是 URL 参数被转义后的形式。", "mid");
+
+  /* 其它 */
+  if(/^\d{6}$/.test(s))
+    add("6 位纯数字","形态类似短信验证码。这是<b>一次性身份凭证</b>：本工具不对其做任何识别或还原，也请不要把他人验证码用于任何操作。", "bad");
+  else if(/^\d+$/.test(s))
+    add("纯数字字符串","可能是编号、订单号或 ID，不含哈希特征。", "mid");
+  if(/^(ssh-rsa|ssh-ed25519|ssh-dss|ecdsa-sha2-nistp\d+)\s+[A-Za-z0-9+/=]+/.test(s))
+    add("SSH 公钥","这是公钥（可以公开分发）；请确认对应的私钥已加密保存且未泄露。", "ok");
+  if(/^-----BEGIN [A-Z ]+-----/.test(s))
+    add("PEM 格式内容（证书或密钥文件）","若内容以 BEGIN PRIVATE KEY / BEGIN RSA PRIVATE KEY 开头，则为私钥，属最高敏感级别：不要粘贴、不要外发，泄露需立即吊销并重新签发。", "bad");
+
+  return out;
+}
+
+function renderHv(list){
+  if(!list.length) return '<div class="box">未匹配到常见格式。<div class="hint">可能是不常见的自定义格式，或包含空格/换行等字符。请确认粘贴完整后重试。</div></div>';
+  var h = ['<div class="box"><b>候选格式（按长度与字符集推测）</b><table>'];
+  list.forEach(function(o){
+    var cls = o.cls === "bad" ? "bad" : o.cls === "ok" ? "ok" : "mid";
+    h.push('<tr><th style="width:36%"><span class="'+cls+'">'+esc(o.name)+'</span></th><td>'+(o.note?o.note:'—')+'</td></tr>');
+  });
+  h.push('</table><div class="hint">只是形态推测，可能同时对应多种格式，也可能误判；本工具不做任何还原、解密或查询。</div></div>');
+  h.push('<div class="legal"><b>如果你在自己系统里发现了不合适的格式</b><ul>');
+  h.push('<li>口令存储用了 MD5 / SHA-1 / 无盐哈希 → 迁移到 <b>argon2id</b>（推荐）或 <b>bcrypt / scrypt</b>，为每个口令使用独立随机盐。</li>');
+  h.push('<li>发现密钥、Token、私钥出现在日志、代码库、聊天记录里 → 视为已泄露：<b>立即吊销并轮换</b>，再排查使用记录。</li>');
+  h.push('<li>把 Base64 当成加密来"保护"数据 → 改用真正的加密存储（AES-GCM 等），并管理好密钥。</li>');
+  h.push('</ul></div>');
+  return h.join("");
+}
+
+/* ============================ 三~七、自查清单 ============================ */
+
+var SECS = [
+  {
+    k:"phish", n:"钓鱼与诈骗风险识别", polarity:"risk", weight:1.2,
+    items:[
+      { n:"发件人/对方域名与官方不一致：拼写近似、多级子域名、奇怪后缀，或用短链接隐藏真实地址", w:3, act:"不点击链接，手动输入官方网址或直接从官方 App 进入核实。" },
+      { n:"话术制造紧迫感：限时处理、「否则冻结/封号/追责/上门/通告」", w:2, act:"凡是催你立刻决定的，先停下来，改用官方渠道自行核实。" },
+      { n:"索要短信验证码、密码、动态口令、银行卡 CVV 或身份证照片", w:3, critical:true, act:"正面机构不会索要验证码与密码。已提供请立即改密、开启两步验证、检查登录设备与资金流水。" },
+      { n:"要求转账、汇款、充值、扫码付款、购买礼品卡或虚拟币", w:3, critical:true, act:"不要付款。已转账立即拨打 96110 或 110，并联系银行申请紧急止付、冻结账户。" },
+      { n:"要求安装远程控制软件或共享屏幕（TeamViewer、AnyDesk、向日葵、远程协助等）", w:3, critical:true, act:"立即拒绝。若已安装：断开网络、卸载软件、修改所有重要账号口令、核对银行与支付流水。" },
+      { n:"自称公安、检察院、法院、海关、银行、平台客服、领导或熟人，要求「配合调查」或代办事务", w:2, act:"挂断后自行通过官方电话核实（如 110、银行官方客服），不要回拨对方给的号码。" },
+      { n:"要求点击链接或在陌生页面填写账号、密码、身份证、银行卡信息", w:3, act:"不要填写。若不慎填写，立即修改该账号口令，并联系银行/平台冻结与核查。" },
+      { n:"要求脱离官方平台私下沟通或交易（加私人微信/QQ/Telegram、绕开平台付款）", w:2, act:"沟通与交易保留在官方平台内；脱离平台的交易通常无法维权。" },
+      { n:"承诺高收益、中奖、退税、补贴、内部消息、刷单返利、荐股等好处", w:2, act:"这是典型诱饵，不要投入任何资金；把聊天记录与对方账号信息留存。" },
+      { n:"威胁曝光隐私、裸聊敲诈，或声称你涉嫌案件需要「自证清白/缴纳保证金」", w:3, act:"不要转账、不要删除记录；截图保存证据后报警（110 / 96110）。" },
+      { n:"要求下载安装非官方渠道的 App / APK / 插件，或开启「未知来源安装」「信任企业证书」", w:3, act:"不要安装。已安装请立即断网、卸载该应用，并修改相关账号口令。" },
+      { n:"要求提供收款码/付款码截图、开通免密支付，或共享支付页面", w:2, act:"付款码等同于现金，绝不可截图给他人；已泄露请立即更换并核对扣款记录。" },
+      { n:"先给小额返利或红包，再诱导追加投入（刷单、杀猪盘套路）", w:2, act:"立即停止追加投入，整理已支付凭证与对方信息后报警。" },
+      { n:"对方拒绝视频或当面核实身份，身份信息含糊、前后矛盾", w:1, act:"无法核实的身份一律按不可信处理：不转账、不提供个人信息。" },
+      { n:"扫码后被要求授权登录、绑定账号或开启权限", w:2, act:"取消授权；若已授权，请在账号的「授权应用」中移除并修改口令。" }
+    ]
+  },
+  {
+    k:"account", n:"账号安全", polarity:"safe", weight:1.2,
+    items:[
+      { n:"邮箱、支付、社交、工作等重要账号都开启了两步验证（多因素认证）", w:3, act:"逐个开启两步验证，优先用验证器 App 或安全密钥，短信验证码作为次选。" },
+      { n:"每个网站使用不同的口令，没有一处口令在多处复用", w:3, act:"按优先级改密：邮箱 → 支付 → 社交 → 工作，全部改为互不相同的随机长口令。" },
+      { n:"使用密码管理器（或系统钥匙串）生成并保存长随机口令", w:2, act:"选一个主流密码管理器，先把最重要的 5 个账号纳管。" },
+      { n:"恢复邮箱与恢复手机号是自己在用、能正常接收验证码的", w:3, act:"账号找回全靠它们，请立即更新为当前在用的邮箱与手机号。" },
+      { n:"近期核对过「登录设备/登录记录」，没有陌生设备或异地登录", w:2, act:"在账号安全设置里退出陌生设备，并开启新设备登录提醒。" },
+      { n:"第三方授权登录/OAuth 应用列表已清理，只保留确实需要的", w:2, act:"移除长期不用的授权应用，尤其能读取邮件、通讯录、云盘的。" },
+      { n:"支付工具设置了限额、关闭了不必要的免密与自动扣款，绑卡余额可控", w:2, act:"设置单笔/单日限额，关闭小额免密，解绑不常用银行卡。" },
+      { n:"没有使用手机号、生日、姓名拼音、门牌号等公开信息组合成的口令", w:2, act:"这类口令可被社工推测，请全部更换。" },
+      { n:"邮箱的转发规则、自动回复、过滤器里没有陌生条目", w:2, act:"检查邮件转发与过滤规则，账号被接管后常被用来长期窃取邮件。" },
+      { n:"账号绑定的手机号未被异常更换，SIM 卡没有异常挂失/补办", w:3, act:"联系运营商设置服务密码与 SIM 卡 PIN，警惕「补卡攻击」。" },
+      { n:"清楚账号被接管后的处置步骤（改密、踢设备、查转发规则、查资金）", w:1, act:"把处置步骤存在可信的地方，出事时能照着做。" },
+      { n:"定期梳理账号清单，注销不再使用的账号", w:1, act:"老账号是长期风险源，尤其是曾泄露过数据的论坛与电商。" }
+    ]
+  },
+  {
+    k:"backup", n:"备份与数据安全", polarity:"safe", weight:1.0,
+    items:[
+      { n:"重要数据有 3 份副本（原文件 + 2 份备份）", w:3, act:"补齐副本数量，先覆盖最不可再生的数据（照片、文档、代码、证书）。" },
+      { n:"备份分布在 2 种以上不同介质（如本机硬盘 + 移动硬盘 + 云盘）", w:3, act:"至少再加一种介质，避免同一块硬盘或同一个云账号一起失效。" },
+      { n:"至少有 1 份备份在异地或离线（不长期联网、不长期插电）", w:3, act:"准备一块离线硬盘，定期备份后断开连接并异地存放。" },
+      { n:"备份内容已加密，尤其是放在云盘或移动硬盘里的文件", w:3, act:"使用加密容器或加密归档再上传/存放。" },
+      { n:"备份是自动或定期执行的，不会因为忘记而中断", w:2, act:"设置自动备份任务或日历提醒，并把执行周期记录下来。" },
+      { n:"做过至少一次恢复演练，确认备份确实能还原", w:3, act:"挑一个文件在原数据不受影响的前提下实际恢复一次，验证可用性。" },
+      { n:"清楚备份的保存位置与加密口令，并留有应急访问方式", w:2, act:"把备份位置与口令写进受控的应急文档并妥善保存。" },
+      { n:"手机照片、通讯录、聊天记录有云同步或定期本地导出", w:2, act:"开启云同步或定期导出；注意同步不等于备份（删除也会同步删除）。" },
+      { n:"备份介质与主设备分开存放，不放在同一房间、同一包内", w:2, act:"分开存放，防盗、防火、防水灾与误丢。" },
+      { n:"关键账号的恢复码/密钥有纸质留存并放在安全处", w:2, act:"两步验证恢复码打印或抄写后妥善保管，不要只存在手机里。" }
+    ]
+  },
+  {
+    k:"host", n:"主机 / 服务器暴露面", polarity:"safe", weight:1.1,
+    items:[
+      { n:"对外只开放业务必需的端口，其余端口已关闭或限制来源 IP", w:3, act:"按「默认拒绝」原则梳理：能关就关，必须开放的限定来源地址段。" },
+      { n:"远程管理入口（SSH/RDP/控制面板/数据库）不直接暴露公网，走 VPN/跳板机/白名单", w:3, act:"把管理入口收到内网或 VPN 之后，公网只保留业务端口。" },
+      { n:"已禁止 root / administrator 直接远程登录，改用密钥或强口令 + 多因素", w:3, act:"禁用口令登录与管理员直登，统一用密钥 + 多因素 + 普通账号按需提权。" },
+      { n:"所有默认口令、示例账号、测试账号已修改或删除", w:3, act:"逐项核查中间件、数据库、管理后台、路由器与物联网设备的初始凭据。" },
+      { n:"系统、中间件与依赖组件在维护窗口内及时更新，并有版本清单", w:3, act:"建立组件与版本清单，订阅安全公告，按优先级打补丁并记录。" },
+      { n:"已启用登录/操作/异常日志，并集中保存到与主机隔离的位置", w:3, act:"主机上的日志可被篡改，必须外发到独立日志服务器或日志服务，并设置保留期。" },
+      { n:"关键告警（异常登录、批量失败、异常出网、异常进程）有通知渠道且被真正查看", w:2, act:"先做 3–5 条最有价值的告警，明确谁在多长时间内响应。" },
+      { n:"遵循最小权限：账号只拥完成工作所需的权限，不共用账号", w:2, act:"取消共享账号与长期高权限账号，改为按需授权并留痕。" },
+      { n:"数据库不对公网开放，应用使用独立低权限账号，不用管理员账号连接", w:3, act:"数据库只允许应用内网访问，按库/表授权，禁止使用管理员账号连接。" },
+      { n:"重要操作有变更记录与回滚方案，关键变更有人复核", w:2, act:"建立简易变更流程：谁改、改什么、怎么回滚、谁复核。" },
+      { n:"有网络层防护（防火墙/安全组/云 WAF）并限制不必要的外连", w:2, act:"入向限制来源、出向限制目标，阻断挖矿与勒索软件的常见回连。" },
+      { n:"上线前做过配置核查：关闭调试模式、隐藏详细报错与版本信息、删除测试页面与示例数据", w:2, act:"把上线核查清单化，避免调试接口与示例账号成为入口。" },
+      { n:"明确安全责任人，以及出事时第一时间联系谁、怎么联系", w:2, act:"把应急联络人与升级路径写成文档，并定期确认联系方式有效。" }
+    ]
+  },
+  {
+    k:"mobile", n:"手机与个人设备", polarity:"safe", weight:1.0,
+    items:[
+      { n:"系统和应用保持最新，已开启自动更新", w:3, act:"开启自动更新并重启完成安装；已停止维护的系统尽早换新。" },
+      { n:"屏幕锁使用 6 位以上数字或生物识别，未使用简单图案、生日或连号", w:3, act:"改用 6 位以上随机数字 + 指纹/面容，并开启多次失败自动擦除。" },
+      { n:"设备已开启存储加密（现代手机默认开启，已确认未被关闭）", w:3, act:"确认加密状态；iOS 设了锁屏密码即加密，安卓在安全设置中查看。" },
+      { n:"只从官方应用商店安装应用，「未知来源安装」处于关闭状态", w:3, act:"关闭未知来源安装；不安装群聊/短信里发来的安装包。" },
+      { n:"逐个检查过应用权限，取消了不必要的通讯录/短信/定位/麦克风/相册权限", w:2, act:"按最小必要原则收回权限，特别注意通讯录、短信、无障碍、悬浮窗权限。" },
+      { n:"设备未越狱、未 root、未安装来源不明的描述文件与插件（如企业证书应用）", w:3, act:"越狱/root 会破坏系统安全机制，建议恢复官方系统并删除陌生描述文件。" },
+      { n:"公共 WiFi 下不登录网银、不输入重要口令，必要时用手机流量或可信 VPN", w:2, act:"重要账号操作留给流量或可信网络；关闭「自动连接开放 WiFi」。" },
+      { n:"已开启「查找我的设备」并能远程锁定/抹除，知道怎么操作", w:2, act:"现在就去确认功能已开启，并记录挂失流程。" },
+      { n:"蓝牙/NFC/个人热点不用时关闭，不随意连接陌生设备", w:1, act:"不使用时关闭，避免未授权连接与近距离嗅探。" },
+      { n:"旧手机/旧电脑转让或回收前已彻底清除数据并退出所有账号", w:3, act:"先退出账号并关闭激活锁，再恢复出厂设置，最后确认云端无残留。" },
+      { n:"不点击短信、群聊里的短链接与安装包，不扫来源不明的二维码", w:2, act:"链接只从官方 App 或手动输入网址进入。" },
+      { n:"支持安全密钥/生物识别的地方已启用（如支付、银行 App）", w:1, act:"在支付与银行 App 中启用生物识别与设备绑定。" }
+    ]
+  }
+];
+
+/* ============================ 八、应急响应 ============================ */
+
+var EMG = [
+  {
+    k:"emg_account", n:"账号被盗 / 被接管",
+    steps:[
+      "立即用可信设备（不要通过收到的链接）尝试登录并修改口令；若已无法登录，走官方「找回账号」流程，并尽快联系人工客服。",
+      "在账号安全设置中「退出所有设备/注销其他会话」，把已被登录的会话强制下线。",
+      "检查并清理异常设置：邮件转发规则、自动回复、过滤器、代收邮箱、绑定的手机号/邮箱、授权应用、应用专用密码、支付绑定。",
+      "修改与该账号复用同一口令的其他账号，优先级：邮箱 → 支付 → 社交 → 工作。",
+      "检查支付与账单：核对交易明细与自动扣款，发现异常交易立即联系银行/支付平台止付与冻结。",
+      "确认是否有人冒用你的名义发消息、下单或申请贷款，必要时通知联系人、同事与客户防范冒充诈骗。",
+      "重新开启两步验证，优先使用验证器 App 或安全密钥，而不是短信验证码。",
+      "整理时间线：何时发现、异常登录时间、做过哪些操作、联系过谁，便于后续申诉与报案。"
+    ],
+    evidence:[
+      "异常登录通知、邮件原文与截图（保留时间、IP、设备、来源地）",
+      "账号设置被改动的通知邮件、短信与页面截图",
+      "与平台客服的沟通记录与工单编号",
+      "异常交易、订单、扣款的截图与银行/支付流水",
+      "如果曾在钓鱼页面输入过信息，保留该页面链接与原始短信（不要删除）"
+    ],
+    contacts:[
+      "平台官方客服/安全中心（通过官方 App 或官网进入，不要用对方提供的链接或电话）",
+      "银行与支付机构客服（申请止付、冻结、争议交易处理）",
+      "涉及财产损失或个人信息被冒用：拨打 110 或 96110（反诈专线）报案",
+      "垃圾短信、诈骗链接可向 12321 举报；涉诈账号同时在平台内举报"
+    ],
+    forbidden:[
+      "不要继续与对方沟通，也不要按对方要求支付任何「解冻费/保证金/手续费」",
+      "不要删除短信、邮件、聊天记录等原始证据",
+      "不要把验证码、口令、身份证照片发给任何人（包括自称客服的人）",
+      "不要使用对方提供的「找回链接」或安装其提供的「安全工具」"
+    ]
+  },
+  {
+    k:"emg_ransom", n:"收到勒索软件 / 勒索信",
+    steps:[
+      "立即切断受感染设备的网络（拔网线、关 WiFi），阻止向共享目录与其他主机扩散。",
+      "隔离同网段设备：暂停文件共享、映射盘、备份服务器的连接，确认备份是否已被加密或被删除。",
+      "不要在受感染设备上继续操作或处理业务，也不要接 U 盘往外拷数据（可能一起被加密）。",
+      "完整保留勒索信原文与截图，并记录被加密文件的样本、文件名后缀与扩展名变化。",
+      "排查可用恢复来源：离线备份、云盘历史版本/快照、邮件与协作平台的回收站；确认备份干净后再恢复。",
+      "上报内部 IT/安全负责人，必要时联系专业应急响应机构介入，不要自行反复尝试修复。",
+      "如涉及关键业务、用户数据或较大财产损失，向公安机关网安部门报案并保留报案回执。",
+      "恢复后必须做收尾：重置所有可能泄露的凭据与密钥，补齐入口修复（弱口令、暴露的远程入口、未打补丁组件），并完善备份与监控。"
+    ],
+    evidence:[
+      "勒索信文件与全文截图（含对方联系方式与钱包地址——仅作证据留存）",
+      "被加密文件样本、加密后的扩展名、加密前后对照",
+      "系统日志、安全日志（登录、远程连接、软件安装、异常进程记录）",
+      "网络设备日志（防火墙、路由器、VPN 的登录与连接记录）",
+      "备份清单与完整性校验结果，以及此前的恢复演练记录",
+      "事件时间线：首次发现时间、断网时间、做过的每一步处置"
+    ],
+    contacts:[
+      "单位 IT/安全负责人，以及云服务商、主机商的应急通道",
+      "专业网络安全应急响应服务团队（建议提前留存联系方式）",
+      "涉及犯罪：当地公安机关网安部门报警（保留受案回执）",
+      "涉及个人信息泄露：由法务/合规判断并依法规履行报告与告知义务"
+    ],
+    forbidden:[
+      "严禁支付赎金：不保证能解密，且可能触发二次勒索、资助犯罪与合规风险",
+      "不要删除或格式化日志、磁盘，也不要在原机「清理干净」后继续使用",
+      "不要在被感染主机上继续登录邮箱、财务与办公系统",
+      "不要盲目下载运行来源不明的「解密工具」（此类工具常为二次投毒）",
+      "不要把勒索信中的联系方式当作正规渠道去沟通"
+    ]
+  },
+  {
+    k:"emg_server", n:"服务器 / 网站被入侵",
+    steps:[
+      "先做证据保全：导出系统日志、Web/API 访问日志、进程列表、网络连接、账号与计划任务的快照到与主机隔离的介质，再动手清理。",
+      "评估影响面：哪些数据可能被访问或下载、是否留有后门（新增账号、SSH 公钥、计划任务、启动项、Web 目录异常文件）。",
+      "断网隔离，或把站点切到只读维护页，避免在受控状态下继续对外提供服务。",
+      "有条件时对受损主机做整盘镜像，之后用干净镜像重建服务，而不是在原机上反复清洗。",
+      "重置所有凭据与密钥：服务器账号、数据库口令、API Key、云平台访问密钥、证书；同时检查是否有未授权新增的子账号或密钥。",
+      "修复入口：补齐系统与组件补丁、修改弱口令、收敛暴露的端口与管理入口、检查上传与目录权限。",
+      "从可信备份恢复数据并核对完整性；按合规要求通知受影响用户与相关方。",
+      "复盘落地：监控告警、最小权限、变更流程与定期自查机制。"
+    ],
+    evidence:[
+      "系统日志、Web/API 访问日志、数据库审计日志、云平台操作日志",
+      "进程、网络连接、计划任务、启动项、账号与公钥的导出快照",
+      "新增或改动文件的清单与哈希值，可疑文件样本（只保存，不运行）",
+      "入侵时间线与你的每一步处置记录",
+      "与云服务商/托管商的工单记录与沟通证据"
+    ],
+    contacts:[
+      "云服务商 / IDC / 托管商的安全响应通道",
+      "专业安全应急响应团队（取证、清场与溯源）",
+      "公安机关网安部门（涉及犯罪、较大数据泄露或业务中断）",
+      "涉用户数据时同步法务/合规，依法履行告知与报告义务；若服务器被当作跳板攻击他人，主动联系运营商与受影响方配合处理"
+    ],
+    forbidden:[
+      "不要为了尽快恢复业务就直接删日志或重装覆盖现场",
+      "不要在取证完成前格式化磁盘或手工删除恶意文件",
+      "不要只在原机改口令后继续使用（应先确认无后门，或改后立即重建）",
+      "不要隐瞒或私下处理涉及用户数据泄露的事件",
+      "不要对攻击来源进行反向攻击或入侵（以攻击回应攻击同样违法）"
+    ]
+  },
+  {
+    k:"emg_leak", n:"数据泄露 / 个人信息外泄",
+    steps:[
+      "确认泄露范围：涉及哪些数据、多少条、是否包含口令、身份信息、支付信息或健康等敏感信息。",
+      "立即止损：关闭泄露入口（暴露的接口、公开的对象存储、可访问的日志、未授权的分享链接），回收扩散中的链接与权限。",
+      "保存证据：访问日志、下载记录、暴露页面的快照、发现过程与发现时间。",
+      "内部上报：法务/合规与安全负责人，按《网络安全法》《个人信息保护法》《数据安全法》要求履行报告与告知义务。",
+      "通知受影响用户：说明泄露内容、可能风险与建议措施（改口令、警惕钓鱼与冒充），不要隐瞒或轻描淡写。",
+      "对受影响账号强制重置口令、强制下线并开启多因素；对已泄露的密钥与证书立即吊销并重新签发。",
+      "加固与复核：数据分类分级、最小权限、加密存储、脱敏展示、访问审计、禁止敏感数据外发到个人设备与网盘。",
+      "复盘：找出配置错误与流程缺口，补充定期核查与演练机制。"
+    ],
+    evidence:[
+      "暴露载体的快照（页面、接口、存储桶、日志），发现时间与发现人记录",
+      "访问与下载日志，涉及的数据类型与数量统计",
+      "通知与上报的记录（时间、对象、内容与回执）",
+      "处置措施清单与完成时间线",
+      "用户告知的模板与发送记录"
+    ],
+    contacts:[
+      "内部法务/合规与安全负责人",
+      "主管部门、网信与公安网安（按法规与情节判断）",
+      "云服务商（若因云配置或云服务导致）",
+      "专业法律顾问（评估告知义务、责任边界与后续应对）"
+    ],
+    forbidden:[
+      "不要隐瞒、迟报，或与敲诈者/数据贩子私下交易",
+      "不要删除可证明处置过程的记录与日志",
+      "不要公开未脱敏的受影响用户信息",
+      "不要继续使用已泄露的口令、密钥或证书"
+    ]
+  }
+];
+
+/* ============================ 渲染与计分 ============================ */
+
+var checkedMap = {};   /* 仅记录勾选状态，用于草稿 */
+var emgSel = {};
+var lastPwRes = null;  /* 口令分析派生指标（不含原文），不写入存储 */
+var lastHvRes = null;  /* 格式识别结果（不写入存储） */
+
+function renderSections(){
+  SECS.forEach(function(sec){
+    var box = $("sec_" + sec.k);
+    if(!box) return;
+    sec.items.forEach(function(it, i){
+      var id = "chk_" + sec.k + "_" + i;
+      var d = document.createElement("div");
+      d.className = "chk";
+      d.innerHTML = '<input type="checkbox" id="'+id+'"><label for="'+id+'" style="margin:0;font-size:14.5px;color:#2a3b50">'+
+        (it.critical ? '<span class="bad">⚠ </span>' : '') + '<span class="tag">权重 '+it.w+'</span>' + esc(it.n) + '</label>';
+      box.appendChild(d);
+      $(id).addEventListener("change", function(){
+        if(this.checked) checkedMap[sec.k + "_" + i] = true; else delete checkedMap[sec.k + "_" + i];
+        save();
+      });
+    });
+  });
+  var eb = $("emgbox");
+  EMG.forEach(function(e){
+    var d = document.createElement("div");
+    d.className = "chk";
+    d.innerHTML = '<input type="checkbox" id="emgchk_'+e.k+'"><label for="emgchk_'+e.k+'" style="margin:0">'+esc(e.n)+'</label>';
+    eb.appendChild(d);
+    $("emgchk_" + e.k).addEventListener("change", function(){
+      if(this.checked) emgSel[e.k] = true; else delete emgSel[e.k];
+      save();
+    });
+  });
+}
+
+function secScore(sec){
+  var tot = 0, got = 0, unmetCritical = [], unmet = [], riskHit = [], riskCritical = [];
+  sec.items.forEach(function(it, i){
+    var on = !!checkedMap[sec.k + "_" + i];
+    tot += it.w;
+    if(sec.polarity === "safe"){
+      if(on) got += it.w;
+      else { if(it.w >= 3) unmetCritical.push(it); else unmet.push(it) }
+    } else {
+      if(on){ got += 0; if(it.critical) riskCritical.push(it); else riskHit.push(it) }
+      else got += it.w;
+    }
+  });
+  var score = tot ? Math.round(got / tot * 100) : 0;
+  if(sec.polarity === "risk" && riskCritical.length) score = Math.min(score, 25);
+  return { score:score, unmetCritical:unmetCritical, unmet:unmet, riskHit:riskHit, riskCritical:riskCritical };
+}
+
+function levelOf(score){
+  if(score >= 85) return ["总体风险较低","#16803c"];
+  if(score >= 70) return ["风险中等，需补齐短板","#b7791f"];
+  if(score >= 50) return ["风险较高，建议尽快整改","#d97706"];
+  return ["风险高，请优先处理","#c0392b"];
+}
+
+function collectPriorities(scores){
+  var list = [];
+  SECS.forEach(function(sec){
+    var s = scores[sec.k];
+    s.unmetCritical.forEach(function(it){ list.push({ lv:"高", w:it.w, sec:sec.n, n:it.n, act:it.act }) });
+    s.riskCritical.forEach(function(it){ list.push({ lv:"高", w:it.w, sec:sec.n, n:it.n, act:it.act }) });
+    s.unmet.forEach(function(it){ list.push({ lv: it.w===2?"中":"低", w:it.w, sec:sec.n, n:it.n, act:it.act }) });
+    s.riskHit.forEach(function(it){ list.push({ lv: it.w===2?"中":"低", w:it.w, sec:sec.n, n:it.n, act:it.act }) });
+  });
+  if(lastPwRes){
+    if(lastPwRes.score < 50 || lastPwRes.hard.length)
+      list.push({ lv:"高", w:3, sec:"口令强度", n:"当前评估的口令强度仅为「"+lastPwRes.level+"」（熵 "+lastPwRes.bits.toFixed(1)+" bit）", act:"按上面的建议提升长度与随机性，并确认没有在其他网站复用。" });
+    else if(lastPwRes.score < 85)
+      list.push({ lv:"中", w:2, sec:"口令强度", n:"当前评估的口令强度为「中等」（熵 "+lastPwRes.bits.toFixed(1)+" bit）", act:"建议把长度提升到 16 位以上，并避免可推测的结构。" });
+  }
+  if(lastHvRes && lastHvRes.some(function(o){ return o.cls === "bad" }))
+    list.push({ lv:"高", w:3, sec:"格式识别", n:"识别到应当立即处理的格式（弱哈希 / 凭证类 / 私钥类数据）", act:"按「格式识别」一节的处理建议执行：迁移弱哈希、吊销并轮换已泄露的密钥与令牌。" });
+
+  var order = { "高":0, "中":1, "低":2 };
+  list.sort(function(a,b){ return order[a.lv] - order[b.lv] || b.w - a.w });
+  /* 去重（同一名称只保留一次） */
+  var seen = {}, out = [];
+  list.forEach(function(x){ if(!seen[x.n]){ seen[x.n] = 1; out.push(x) } });
+  return out;
+}
+
+function buildReport(){
+  var scores = {};
+  SECS.forEach(function(sec){ scores[sec.k] = secScore(sec) });
+
+  var totalW = 0, totalS = 0;
+  SECS.forEach(function(sec){ totalW += sec.weight; totalS += scores[sec.k].score * sec.weight });
+  if(lastPwRes){ totalW += 1; totalS += lastPwRes.score * 1; }
+  var overall = totalW ? Math.round(totalS / totalW) : 0;
+
+  /* 硬性下调：钓鱼高危特征成立时，整体不能评低风险 */
+  var phishCrit = scores.phish.riskCritical.length;
+  if(phishCrit) overall = Math.min(overall, 45);
+  if(lastPwRes && (lastPwRes.hard.length || lastPwRes.score < 30)) overall = Math.min(overall, 55);
+
+  var lv = levelOf(overall);
+  var pri = collectPriorities(scores);
+
+  var H = [];
+  H.push('<div class="card report" id="report">');
+  H.push('<h2 class="noprint">自查报告</h2>');
+  H.push('<div class="hint noprint">生成时间：'+esc(new Date().toLocaleString("zh-CN"))+'　｜　本报告仅存于本机，不会上传</div>');
+
+  /* 概览 */
+  H.push('<h3>一、总体结论</h3>');
+  H.push('<div class="box"><div class="big" style="color:'+lv[1]+'">'+esc(lv[0])+'</div>');
+  H.push('<div class="hint">综合得分 '+overall+' / 100（各项按权重加权，未勾选的安全项按未落实计入）</div></div>');
+  var scope = ($("scope").value || "").trim();
+  if(scope) H.push('<p><b>自查范围与备注：</b>'+esc(scope)+'</p>');
+
+  if(phishCrit){
+    H.push('<div class="danger">⚠ <b>钓鱼/诈骗高风险特征成立（'+phishCrit+' 项高危）</b><br>请先停止一切付款与信息提供，按下方「钓鱼与诈骗」一节的处置建议立即行动；已转账请立即拨打 96110 或 110 并联系银行止付。</div>');
+  }
+
+  /* 分数表 */
+  H.push('<h3>二、各模块得分</h3><table>');
+  H.push('<tr><th>模块</th><th>得分</th><th>状态</th></tr>');
+  SECS.forEach(function(sec){
+    var sc = scores[sec.k].score;
+    var st = sc >= 85 ? '<span class="ok">良好</span>' : sc >= 70 ? '<span class="mid">一般</span>' : '<span class="bad">需整改</span>';
+    var extra = "";
+    if(sec.polarity === "risk") extra = '<div class="hint">风险项命中 '+ (scores[sec.k].riskCritical.length + scores[sec.k].riskHit.length) +' 条，其中高危 '+scores[sec.k].riskCritical.length+' 条</div>';
+    else if(scores[sec.k].unmetCritical.length) extra = '<div class="hint">关键项未落实 '+scores[sec.k].unmetCritical.length+' 条</div>';
+    H.push('<tr><th>'+esc(sec.n)+'</th><td>'+sc+' / 100'+extra+'</td><td>'+st+'</td></tr>');
+  });
+  if(lastPwRes){
+    var st2 = lastPwRes.score >= 85 ? '<span class="ok">良好</span>' : lastPwRes.score >= 65 ? '<span class="mid">一般</span>' : '<span class="bad">需整改</span>';
+    H.push('<tr><th>口令强度（本次评估的示例口令）</th><td>'+lastPwRes.score+' / 100（'+esc(lastPwRes.level)+'）</td><td>'+st2+'</td></tr>');
+  }
+  H.push('</table>');
+
+  /* 优先加固清单 */
+  H.push('<h3>三、按优先级排序的加固清单</h3>');
+  if(pri.length){
+    var lvs = ["高","中","低"];
+    lvs.forEach(function(L){
+      var arr = pri.filter(function(x){ return x.lv === L });
+      if(!arr.length) return;
+      H.push('<div class="box '+(L==="高"?"p-high":L==="中"?"p-mid":"p-low")+'"><b>'+L+'优先级（'+arr.length+' 项）</b><ul>');
+      arr.slice(0, 12).forEach(function(x){
+        H.push('<li><b>'+esc(x.n)+'</b><span class="hint" style="display:inline">（'+esc(x.sec)+'）</span><br><span style="color:#2a3b50">→ '+esc(x.act)+'</span></li>');
+      });
+      if(arr.length > 12) H.push('<li class="hint">…以及其余 '+(arr.length-12)+' 项，可在页面清单中查看</li>');
+      H.push('</ul></div>');
+    });
+  } else {
+    H.push('<p>没有待处理项——请确认你确实逐项核对过，而不是漏勾。</p>');
+  }
+
+  /* 口令强度结论 */
+  H.push('<h3>四、口令强度结论</h3>');
+  if(lastPwRes){
+    var f = lastPwRes.f, kinds = [];
+    if(f.lower) kinds.push("小写字母"); if(f.upper) kinds.push("大写字母");
+    if(f.digit) kinds.push("数字"); if(f.symbol) kinds.push("符号"); if(f.other) kinds.push("非 ASCII 字符");
+    H.push('<table><tr><th>长度</th><td>'+lastPwRes.len+' 个字符</td></tr>');
+    H.push('<tr><th>字符集大小</th><td>'+lastPwRes.pool+'（'+esc(kinds.join("、"))+'）</td></tr>');
+    H.push('<tr><th>信息熵</th><td>'+lastPwRes.bits.toFixed(1)+' bit</td></tr>');
+    H.push('<tr><th>强度等级</th><td>'+esc(lastPwRes.level)+'</td></tr></table>');
+    if(lastPwRes.issues.length){
+      H.push('<p><b>发现的弱模式：</b></p><ul>');
+      lastPwRes.issues.forEach(function(it){ H.push('<li>['+esc(it.level)+'] '+esc(it.title)+'　<span class="hint">'+esc(it.tip)+'</span></li>') });
+      H.push('</ul>');
+    } else H.push('<p>未发现常见弱模式。</p>');
+    H.push('<p class="hint">为避免泄露，本报告不包含你输入的口令原文，也没有把它保存到任何地方。</p>');
+  } else {
+    H.push('<p>未做口令评估。</p>');
+  }
+
+  /* 格式识别结论 */
+  H.push('<h3>五、格式识别结论</h3>');
+  if(lastHvRes && lastHvRes.length){
+    H.push('<ul>');
+    lastHvRes.forEach(function(o){ H.push('<li><b>'+esc(o.name)+'</b>　<span class="hint">'+esc(o.note.replace(/<[^>]+>/g,""))+'</span></li>') });
+    H.push('</ul><p class="hint">仅为形态推测；本工具不做解密、还原或查询。</p>');
+  } else {
+    H.push('<p>未做格式识别，或未匹配到常见格式。</p>');
+  }
+
+  /* 应急响应 */
+  H.push('<h3>六、应急响应流程</h3>');
+  var picked = EMG.filter(function(e){ return emgSel[e.k] });
+  if(!picked.length){
+    H.push('<p>未选择应急情形。建议至少提前了解「账号被盗」与「数据泄露」的处置步骤，出事时能少走弯路。</p>');
+  } else {
+    picked.forEach(function(e){
+      H.push('<div class="box"><b>'+esc(e.n)+'</b>');
+      H.push('<p style="margin:8px 0 4px"><b>分步处置</b></p><ol style="padding-left:22px;margin:4px 0">');
+      e.steps.forEach(function(s){ H.push('<li>'+esc(s)+'</li>') });
+      H.push('</ol>');
+      H.push('<p style="margin:8px 0 4px"><b>需要保留的证据</b></p><ul>');
+      e.evidence.forEach(function(s){ H.push('<li>'+esc(s)+'</li>') });
+      H.push('</ul>');
+      H.push('<p style="margin:8px 0 4px"><b>应当联系谁</b></p><ul>');
+      e.contacts.forEach(function(s){ H.push('<li>'+esc(s)+'</li>') });
+      H.push('</ul>');
+      H.push('<div class="danger" style="margin-top:8px"><b>禁止事项</b><ul style="padding-left:20px;margin:6px 0">');
+      e.forbidden.forEach(function(s){ H.push('<li>'+esc(s)+'</li>') });
+      H.push('</ul></div></div>');
+    });
+  }
+
+  /* 未落实项明细 */
+  H.push('<h3>七、未落实项明细（自查用）</h3>');
+  var anyUnmet = false;
+  var uh = ['<table><tr><th>模块</th><th>待确认 / 未落实项</th></tr>'];
+  SECS.forEach(function(sec){
+    sec.items.forEach(function(it, i){
+      var on = !!checkedMap[sec.k + "_" + i];
+      var bad = sec.polarity === "safe" ? !on : on;
+      if(!bad) return;
+      anyUnmet = true;
+      uh.push('<tr><th>'+esc(sec.n)+'</th><td>'+esc(it.n)+'<div class="hint">→ '+esc(it.act)+'</div></td></tr>');
+    });
+  });
+  uh.push('</table>');
+  H.push(anyUnmet ? uh.join("") : '<p>全部条目均已勾选。请复核是否有误勾（自查的意义在于发现问题，而不是全部打勾）。</p>');
+
+  /* 法律边界与说明 */
+  H.push('<h3>八、法律边界与说明</h3>');
+  H.push('<ul>');
+  H.push('<li>本报告仅适用于你本人拥有或已获书面授权的对象；请保留授权文件与操作记录。</li>');
+  H.push('<li>未经授权对他人系统进行测试、扫描或干扰，可能违反《网络安全法》，并可能触犯《刑法》第 285 条（非法侵入计算机信息系统、非法获取计算机信息系统数据）、第 286 条（破坏计算机信息系统）等规定。</li>');
+  H.push('<li>最终以办案机关与主管部门认定为准。</li>');
+  H.push('</ul>');
+
+  H.push('<h3>九、方法说明</h3>');
+  H.push('<p class="hint">口令熵值采用「长度 × log₂(字符集大小)」的估算模型，字符集按实际出现的字符类别累加（小写 26、大写 26、数字 10、符号 32、非 ASCII 约 100）。'
+    + '该模型不覆盖字典与模式化猜测，因此实际强度可能低于估算值。'
+    + '风险分级为各模块未落实项与风险项的加权汇总，用于排序整改优先级，不代表真实安全水平。'
+    + '本页面为纯静态单文件，无网络请求、无第三方脚本，输入内容不上传（口令与格式识别输入框不写入本地存储）。</p>');
+
+  H.push('<div class="noprint"><div class="btn-row"><button class="btn" id="dl">导出为文本文件</button><button class="btn" id="pr">打印 / 存为PDF</button></div>');
+  H.push('<button class="btn alt" id="backtop">返回顶部继续完善自查</button></div>');
+  H.push('</div>');
+
+  var host = $("result");
+  host.innerHTML = H.join("");
+  host.scrollIntoView({ behavior:"smooth" });
+  $("pr").onclick = function(){ window.print() };
+  $("dl").onclick = function(){ download(host.innerText) };
+  $("backtop").onclick = function(){ window.scrollTo({ top:0, behavior:"smooth" }) };
+  try { localStorage.setItem("heilong_last_report", host.innerText) } catch(e){}
+}
+
+function download(text){
+  var blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "安全自查报告-" + new Date().toISOString().slice(0,10) + ".txt";
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href) }, 2000);
+}
+
+/* ============================ 草稿保存（不含口令） ============================ */
+
+/* 明确排除：pw（口令）与 hv（格式识别输入）——这两项永不写入本地存储 */
+var SAVE_FIELDS = ["scope"];
+
+function save(){
+  try{
+    var d = { f:{} };
+    SAVE_FIELDS.forEach(function(k){ d.f[k] = $(k) ? $(k).value : "" });
+    d.chk = Object.keys(checkedMap);
+    d.emg = Object.keys(emgSel);
+    d.own = $("own") ? $("own").checked : false;
+    d.ts = Date.now();
+    localStorage.setItem("heilong_draft", JSON.stringify(d));
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    var s = localStorage.getItem("heilong_draft");
+    if(!s) return;
+    var d = JSON.parse(s);
+    (d.chk || []).forEach(function(k){ checkedMap[k] = true; var el = $("chk_" + k); if(el) el.checked = true });
+    (d.emg || []).forEach(function(k){ emgSel[k] = true; var el = $("emgchk_" + k); if(el) el.checked = true });
+    SAVE_FIELDS.forEach(function(k){ if(d.f && d.f[k] != null && $(k)) $(k).value = d.f[k] });
+    if(d.own && $("own")) $("own").checked = true;
+  }catch(e){}
+}
+
+/* ============================ 事件绑定 ============================ */
+
+$("pwgo").onclick = function(){
+  var pw = $("pw").value;
+  if(!pw){ alert("请先输入一个待评估的口令（可用结构相似的示例口令）"); return }
+  lastPwRes = analyzePassword(pw);
+  $("pw").value = "";                 /* 评估后立即清空输入框，不在页面留下任何痕迹 */
+  $("pwout").innerHTML = renderPw(lastPwRes);
+};
+
+$("hvgo").onclick = function(){
+  var v = $("hv").value;
+  lastHvRes = detectFormat(v);
+  $("hv").value = "";
+  $("hvout").innerHTML = renderHv(lastHvRes);
+};
+
+$("go").onclick = function(){
+  if(!$("agree").checked){ alert("请先阅读并勾选顶部说明"); return }
+  if(!$("own").checked){ alert("请确认本次自查仅针对你本人拥有或已获书面授权的对象"); return }
+  save();
+  buildReport();
+};
+
+$("clear").onclick = function(){
+  if(!confirm("确定清空全部自查内容并删除本机草稿？（口令与格式识别输入本来就未被保存）")) return;
+  try{
+    localStorage.removeItem("heilong_draft");
+    localStorage.removeItem("heilong_last_report");
+  }catch(e){}
+  location.reload();
+};
+
+$("scope").addEventListener("blur", save);
+$("own").addEventListener("change", save);
+
+renderSections();
+loadDraft();
+</script>
+</body>
+</html>
